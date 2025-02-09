@@ -6,7 +6,7 @@ inputs:
     required: true
   terraform_dir:
     description: "Working directory of terraform"
-    required: true
+    default: "./"
   backend_role_arn:
     description: "AWS Role to assume"
     required: true
@@ -18,7 +18,7 @@ inputs:
     required: true
   backend_state_key:
     description: "Terraform State File Key"
-    required: true
+    default: "state/terraform-state"
   backend_lockid_table:
     description: "Terraform Lockid table"
     required: true
