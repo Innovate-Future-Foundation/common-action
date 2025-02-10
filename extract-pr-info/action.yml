@@ -24,9 +24,14 @@ runs:
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
-        echo "Using dispatch input to retrieve pull request commit hash."
-        PR_NUMBER=${{ inputs.pr_number }}
-        PR_HASH=$(gh pr view $PR_NUMBER --json commits --jq '.commits[-1].oid' || exit 1)
+        if [ "${{ inputs.pr_number }}" -eq 0 ]; then
+          echo "Dispatch input is 0. The default behaviour should be triggered."
+          PR_HASH="default"
+        else
+          echo "Dispatch input is ${{ inputs.pr_number }}. Retrieving pull request commit hash."
+          PR_NUMBER=${{ inputs.pr_number }}
+          PR_HASH=$(gh pr view $PR_NUMBER --json commits --jq '.commits[-1].oid' || exit 1)
+        fi
         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
         echo "pr_hash=$PR_HASH" >> $GITHUB_OUTPUT
 
