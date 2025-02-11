@@ -67,6 +67,7 @@ runs:
 
     - id: consolidate
       name: Finalize Outputs
+      shell: bash
       run: |
         echo "pr_number=${{ steps.handle_dispatch.outputs.pr_number || steps.handle_push.outputs.pr_number }}" >> $GITHUB_OUTPUT
         echo "pr_hash=${{ steps.handle_dispatch.outputs.pr_hash || steps.handle_push.outputs.pr_hash }}" >> $GITHUB_OUTPUT
