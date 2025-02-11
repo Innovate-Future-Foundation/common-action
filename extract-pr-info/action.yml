@@ -21,12 +21,13 @@ runs:
   using: "composite"
   steps:
     - id: handle_dispatch
-      name: Handle Dispatch Input
+      name: Handle Dispatch Event
       if: ${{ inputs.pr_number != '' }}
       shell: bash
       env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
       run: |
+        # Handle Dispatch Event
         if [ "${{ inputs.pr_number }}" -eq 0 ]; then
           echo "Dispatch input is 0. The default behaviour should be triggered."
           PR_NUMBER=0
@@ -45,7 +46,8 @@ runs:
       if: ${{ inputs.pr_number == '' }}
       shell: bash
       run: |
-        echo "Validating current head commit message for squash merge."
+        # Handle Push Event
+        echo "Validating current head commit message"
         COMMIT_MESSAGE=$(git log -1 --pretty=%B | head -n 1)
         PR_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -oP '\(#\K\d+')
 
