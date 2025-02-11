@@ -34,7 +34,7 @@ runs:
         else
           echo "Dispatch input is ${{ inputs.pr_number }}. Retrieving pull request commit hash."
           PR_NUMBER=${{ inputs.pr_number }}
-          PR_HASH=$(ggh pr view $PR_NUMBER --json mergeCommit --jq '.mergeCommit.oid' || exit 1)
+          PR_HASH=$(gh pr view $PR_NUMBER --json mergeCommit --jq '.mergeCommit.oid' || exit 1)
           PR_HASH=$(git rev-parse --short $PR_HASH)
         fi
         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
