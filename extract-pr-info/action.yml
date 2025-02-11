@@ -10,14 +10,17 @@ inputs:
 outputs:
   pr_number:
     description: "The PR number extracted or provided."
+    value: ${{ steps.consolidate.outputs.pr_number }}
   pr_hash:
     description: "The short commit hash of the PR."
+    value: ${{ steps.consolidate.outputs.pr_hash }}
   tag:
     description: "Generated tag in the format <short_hash>_<pr_number>."
+    value: ${{ steps.consolidate.outputs.tag }}
 runs:
   using: "composite"
   steps:
-    - id: handle_dispatch_input
+    - id: handle_dispatch
       name: Handle Dispatch Input
       if: ${{ inputs.pr_number != '' }}
       shell: bash
@@ -26,16 +29,18 @@ runs:
       run: |
         if [ "${{ inputs.pr_number }}" -eq 0 ]; then
           echo "Dispatch input is 0. The default behaviour should be triggered."
+          PR_NUMBER=0
           PR_HASH="default"
         else
           echo "Dispatch input is ${{ inputs.pr_number }}. Retrieving pull request commit hash."
           PR_NUMBER=${{ inputs.pr_number }}
-          PR_HASH=$(gh pr view $PR_NUMBER --json commits --jq '.commits[-1].oid' || exit 1)
+          PR_HASH=$(ggh pr view $PR_NUMBER --json mergeCommit --jq '.mergeCommit.oid' || exit 1)
+          PR_HASH=$(git rev-parse --short $PR_HASH)
         fi
         echo "pr_number=$PR_NUMBER" >> $GITHUB_OUTPUT
         echo "pr_hash=$PR_HASH" >> $GITHUB_OUTPUT
 
-    - id: handle_push_event
+    - id: handle_push
       name: Handle Push Event
       if: ${{ inputs.pr_number == '' }}
       shell: bash
@@ -45,7 +50,7 @@ runs:
         PR_NUMBER=$(echo "$COMMIT_MESSAGE" | grep -oP '\(#\K\d+')
 
         if [ -z "$PR_NUMBER" ]; then
-          echo "Error: Commit message does not follow squash merge pattern. Aborting deployment."
+          echo "Error: Commit message does not follow squash merge pattern, aborting..."
           exit 1
         fi
 
@@ -57,5 +62,12 @@ runs:
       name: Generate Tag
       shell: bash
       run: |
-        TAG="${{ steps.handle_dispatch_input.outputs.pr_hash || steps.handle_push_event.outputs.pr_hash }}_${{ steps.handle_dispatch_input.outputs.pr_number || steps.handle_push_event.outputs.pr_number }}"
+        TAG="${{ steps.handle_dispatch.outputs.pr_hash || steps.handle_push.outputs.pr_hash }}_${{ steps.handle_dispatch.outputs.pr_number || steps.handle_push.outputs.pr_number }}"
         echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+    - id: consolidate
+      name: Finalize Outputs
+      run: |
+        echo "pr_number=${{ steps.handle_dispatch.outputs.pr_number || steps.handle_push.outputs.pr_number }}" >> $GITHUB_OUTPUT
+        echo "pr_hash=${{ steps.handle_dispatch.outputs.pr_hash || steps.handle_push.outputs.pr_hash }}" >> $GITHUB_OUTPUT
+        echo "tag=${{ steps.generate_tag.outputs.tag }}" >> $GITHUB_OUTPUT
