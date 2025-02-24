@@ -1,0 +1,37 @@
+name: "Publish terraform plan file"
+description: "Post terraform plan to pull request comment and upload file to s3."
+inputs:
+  github_token:
+    description: "GitHub token for authentication"
+    required: true
+  tf_dir:
+    description: "Terraform working directory"
+    required: true
+  tf_plan_file:
+    description: "Path to the Terraform plan file"
+    default: ".planfile"
+    required: false
+  s3_bucket:
+    description: "The S3 bucket that stores the terraform plan file"
+    required: true
+  obj_key:
+    description: "Object key of plan file"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: post_plan_details
+      name: Post Terraform Plan to PR
+      uses: borchero/terraform-plan-comment@v2
+      with:
+        working-directory: ${{ inputs.tf_dir }}
+        token: ${{ inputs.github_token }}
+        planfile: ${{ inputs.tf_plan_file }}
+
+    - id: upload_plan_file
+      name: Upload Plan to S3
+      shell: bash
+      run: |
+        aws s3 cp .planfile s3://${{ inputs.s3_bucket }}/${{ inputs.obj_key }}
+        echo "Plan uploaded to S3"

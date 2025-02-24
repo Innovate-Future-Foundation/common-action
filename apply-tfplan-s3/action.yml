@@ -1,0 +1,27 @@
+name: "Terraform apply plan from S3 bucket"
+description: "Download tfplan form S3 bucket and apply plan file."
+inputs:
+  s3_bucket:
+    description: "The S3 bucket that stores the terraform plan file"
+    required: true
+  obj_key:
+    description: "Object key of plan file"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: download_terraform_plan
+      name: Download Plan from S3
+      shell: bash
+      run: |
+        aws s3 cp s3://${{ inputs.s3_bucket }}/${{ inputs.obj_key }} tfplan
+        if [ $? -ne 0 ]; then
+          echo "Failed to retrieve planfile. It may have expired or been deleted."
+          exit 1
+        fi
+
+    - id: apply_terraform_plan
+      name: Terraform Apply tfplan
+      shell: bash
+      run: terraform apply -auto-approve tfplan
