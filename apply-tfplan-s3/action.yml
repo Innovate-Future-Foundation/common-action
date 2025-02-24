@@ -15,6 +15,7 @@ runs:
       name: Download Plan from S3
       shell: bash
       run: |
+        cd ${{github.action_path}}
         aws s3 cp s3://${{ inputs.s3_bucket }}/${{ inputs.obj_key }} tfplan
         if [ $? -ne 0 ]; then
           echo "Failed to retrieve planfile. It may have expired or been deleted."
@@ -24,4 +25,6 @@ runs:
     - id: apply_terraform_plan
       name: Terraform Apply tfplan
       shell: bash
-      run: terraform apply -auto-approve tfplan
+      run: |
+        cd ${{github.action_path}}
+        terraform apply -auto-approve tfplan
