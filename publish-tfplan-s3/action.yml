@@ -33,6 +33,5 @@ runs:
       name: Upload Plan to S3
       shell: bash
       run: |
-        cd ${{github.action_path}}
-        aws s3 cp .planfile s3://${{ inputs.s3_bucket }}/${{ inputs.obj_key }}
+        aws s3 cp ${{ inputs.tf_dir }}/${{ inputs.tf_plan_file }} s3://${{ inputs.s3_bucket }}/${{ inputs.obj_key }}
         echo "Plan uploaded to S3"
