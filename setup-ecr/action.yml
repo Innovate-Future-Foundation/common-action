@@ -1,0 +1,23 @@
+name: Setup ecr with oidc
+description: "This action sets up AWS ECR with OIDC"
+inputs:
+  oidc_role_arn:
+    description: "AWS Role to assume"
+    required: true
+  region:
+    description: "AWS Region"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - id: aws_auth
+      name: Configure AWS Credentials
+      uses: aws-actions/configure-aws-credentials@v2
+      with:
+        aws-region: ${{ inputs.backend_region }}
+        role-to-assume: ${{ inputs.backend_role_arn }}
+
+    - id: login_ecr
+      name: Login to AWS ECR
+      uses: aws-actions/amazon-ecr-login@v2
