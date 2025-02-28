@@ -8,7 +8,7 @@ inputs:
     description: "AWS Region"
     required: true
 outputs:
-  ecr_registry:
+  registry:
     description: "Logged in Amazon ECR Registry"
     value: ${{ steps.login_ecr.outputs.registry }}
 
