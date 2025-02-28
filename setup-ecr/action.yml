@@ -15,8 +15,8 @@ runs:
       name: Configure AWS Credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
-        aws-region: ${{ inputs.backend_region }}
-        role-to-assume: ${{ inputs.backend_role_arn }}
+        aws-region: ${{ inputs.region }}
+        role-to-assume: ${{ inputs.oidc_role_arn }}
 
     - id: login_ecr
       name: Login to AWS ECR
