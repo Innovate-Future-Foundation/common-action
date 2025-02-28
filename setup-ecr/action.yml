@@ -7,6 +7,10 @@ inputs:
   region:
     description: "AWS Region"
     required: true
+outputs:
+  ecr_registry:
+    description: "Logged in Amazon ECR Registry"
+    value: ${{ steps.login_ecr.outputs.registry }}
 
 runs:
   using: "composite"
