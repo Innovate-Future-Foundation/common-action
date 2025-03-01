@@ -7,6 +7,10 @@ inputs:
   region:
     description: "AWS Region"
     required: true
+  registry_account:
+    description: "AWS ECR Registry account"
+    required: false
+
 outputs:
   registry:
     description: "Logged in Amazon ECR Registry"
@@ -22,6 +26,14 @@ runs:
         aws-region: ${{ inputs.region }}
         role-to-assume: ${{ inputs.oidc_role_arn }}
 
-    - id: login_ecr
+    - id: login_self_ecr
       name: Login to AWS ECR
+      if: ${{ inputs.registry_account == '' }}
       uses: aws-actions/amazon-ecr-login@v2
+    
+    - id: login_other_ecr
+      name: Login to AWS ECR
+      if: ${{ inputs.registry_account != '' }}
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        registries: ${{ inputs.registry_account }}
