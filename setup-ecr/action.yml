@@ -14,7 +14,7 @@ inputs:
 outputs:
   registry:
     description: "Logged in Amazon ECR Registry"
-    value: ${{ steps.login_ecr.outputs.registry }}
+    value: ${{ steps.consolidate.outputs.registry }}
 
 runs:
   using: "composite"
@@ -37,3 +37,9 @@ runs:
       uses: aws-actions/amazon-ecr-login@v2
       with:
         registries: ${{ inputs.registry_account }}
+    
+    - id: consolidate
+      name: Finalise Outputs
+      shell: bash
+      run: |
+        echo "registry=${{ steps.login_self_ecr.outputs.registry || steps.login_other_ecr.outputs.registry }}" >> $GITHUB_OUTPUT
